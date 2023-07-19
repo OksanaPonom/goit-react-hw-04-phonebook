@@ -28,6 +28,7 @@ export function Contacts({ contacts, removeContact }) {
     </List>
   );
 }
+
 Contacts.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.shape({

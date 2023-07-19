@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { nanoid } from 'nanoid';
 import 'notiflix';
 import { Notify } from 'notiflix';
@@ -7,35 +7,23 @@ import { Contacts } from './Contacts/Contacts';
 import { Filter } from './Filter/Filter';
 import { MainTitle, Title, Message } from './App.styled';
 
-export class App extends Component {
-  state = {
-    contacts: [
-      // { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      // { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      // { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      // { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
-  };
+export function App() {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(window.localStorage.getItem('contactsList')) ?? []
+  );
+  const [filter, setFilter] = useState('');
 
-  componentDidMount() {
-    const contactsList = JSON.parse(localStorage.getItem('contactsList'));
-    if (contactsList) {
-      this.setState({ contacts: contactsList });
-    }
-  }
-  componentDidUpdate(_, prevState) {
-    if (this.state.contacts !== prevState.contacts) {
-      localStorage.setItem('contactsList', JSON.stringify(this.state.contacts));
-    }
-  }
-  addContact = (name, number) => {
+  useEffect(() => {
+    window.localStorage.setItem('contactsList', JSON.stringify(contacts));
+  }, [contacts]);
+
+  const addContact = (name, number) => {
     const newContact = {
       name,
       number,
       id: nanoid(),
     };
-    const isAlreadyInContacts = this.state.contacts.some(
+    const isAlreadyInContacts = contacts.some(
       contact =>
         contact.name.toLowerCase() === name.toLowerCase() ||
         contact.number === number
@@ -46,48 +34,48 @@ export class App extends Component {
 
       return;
     }
-    this.setState(({ contacts }) => ({ contacts: [newContact, ...contacts] }));
+    setContacts([newContact, ...contacts]);
     Notify.info(`Contact ${name} added`);
   };
-  removeContact = idContact => {
-    const contacts = this.state.contacts;
-    this.setState(({ contacts }) => ({
-      contacts: contacts.filter(({ id }) => id !== idContact),
-    }));
+
+  const removeContact = idContact => {
+    setContacts(contacts => {
+      return contacts.filter(({ id }) => id !== idContact);
+    });
     Notify.info(
       `Contact ${contacts.find(({ id }) => id === idContact).name} deleted`
     );
   };
 
-  changeFilter = e => {
-    this.setState({ filter: e.currentTarget.value.toLowerCase() });
+  const changeFilter = e => {
+    setFilter(e.currentTarget.value.toLowerCase());
   };
 
-  getFilteredContacts = () => {
-    const { filter, contacts } = this.state;
+  const getFilteredContacts = contacts => {
     const normalFilter = filter.toLowerCase();
-    return contacts.filter(contact =>
+    const visibleContacts = contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalFilter)
     );
+    // if (visibleContacts.length === 0) {
+    //   return Notify.info('Contact not found');
+    // }
+    return visibleContacts;
   };
 
-  render() {
-    const { filter } = this.state;
-    const visibleContacts = this.getFilteredContacts();
-    return (
-      <div>
-        <MainTitle>Phonebook</MainTitle>
-        <FormContact addContact={this.addContact} />
-        <Title>Contacts</Title>
-        <Filter value={filter} onChange={this.changeFilter} />
-        {this.state.contacts.length === 0 && (
-          <Message>No contacts available.</Message>
-        )}
-        <Contacts
-          contacts={visibleContacts}
-          removeContact={this.removeContact}
-        />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <MainTitle>Phonebook</MainTitle>
+      <FormContact addContact={addContact} />
+      <Title>Contacts</Title>
+      <Filter value={filter} onChange={changeFilter} />
+      {contacts.length === 0 && <Message>No contacts available.</Message>}
+      {getFilteredContacts(contacts).length === 0 && (
+        <Message>Contact not found</Message>
+      )}
+      <Contacts
+        contacts={getFilteredContacts(contacts)}
+        removeContact={removeContact}
+      />
+    </div>
+  );
 }
