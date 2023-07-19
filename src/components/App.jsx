@@ -56,9 +56,7 @@ export function App() {
     const visibleContacts = contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalFilter)
     );
-    // if (visibleContacts.length === 0) {
-    //   return Notify.info('Contact not found');
-    // }
+
     return visibleContacts;
   };
 
@@ -69,7 +67,7 @@ export function App() {
       <Title>Contacts</Title>
       <Filter value={filter} onChange={changeFilter} />
       {contacts.length === 0 && <Message>No contacts available.</Message>}
-      {getFilteredContacts(contacts).length === 0 && (
+      {getFilteredContacts(contacts).length === 0 && contacts.length !== 0 && (
         <Message>Contact not found</Message>
       )}
       <Contacts
