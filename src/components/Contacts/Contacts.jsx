@@ -19,8 +19,17 @@ export function Contacts({ contacts, removeContact }) {
               <Name>{contact.name}:&nbsp;</Name>
               <Number>{contact.number}</Number>
             </p>
-            <Button type="button" onClick={() => removeContact(contact.id)}>
-              <TrashIcon onClick={() => removeContact(contact.id)} />
+            <Button
+              type="button"
+              onClick={() =>
+                removeContact({ idContact: contact.id, name: contact.name })
+              }
+            >
+              <TrashIcon
+                onClick={() =>
+                  removeContact({ idContact: contact.id, name: contact.name })
+                }
+              />
             </Button>
           </ListItem>
         );

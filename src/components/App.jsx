@@ -34,17 +34,15 @@ export function App() {
 
       return;
     }
-    setContacts([newContact, ...contacts]);
+    setContacts(contacts => [newContact, ...contacts]);
     Notify.info(`Contact ${name} added`);
   };
 
-  const removeContact = idContact => {
+  const removeContact = ({ idContact, name }) => {
     setContacts(contacts => {
       return contacts.filter(({ id }) => id !== idContact);
     });
-    Notify.info(
-      `Contact ${contacts.find(({ id }) => id === idContact).name} deleted`
-    );
+    Notify.info(`Contact ${name} deleted`);
   };
 
   const changeFilter = e => {
